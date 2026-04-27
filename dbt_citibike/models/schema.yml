@@ -1,0 +1,23 @@
+version: 2
+
+models:
+  - name: stg_trips
+    columns:
+      - name: ride_id
+        tests: [not_null, unique]
+
+  - name: stg_stations
+    columns:
+      - name: station_id
+        tests: [not_null, unique]
+
+  - name: fct_trips
+    columns:
+      - name: ride_id
+        tests: [not_null, unique]
+      - name: start_station_id
+        tests:
+          - relationships:
+              arguments:
+                to: ref('stg_stations')
+                field: station_id

@@ -1,0 +1,18 @@
+name: 'citibike_case'
+version: '1.0.0'
+config-version: 2
+
+profile: 'citibike_case'
+
+model-paths: ['models']
+analysis-paths: ['analysis']
+test-paths: ['tests']
+seed-paths: ['seeds']
+macro-paths: ['macros']
+
+models:
+  citibike_case:
+    staging:
+      +materialized: view
+    marts:
+      +materialized: table

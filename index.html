@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="pt">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Citi Bike E-Bike Performance Hub</title>
+  <style>
+    :root {
+      --bg: #071017;
+      --bg2: #0f1a24;
+      --card: #122130;
+      --line: #23405a;
+      --text: #ecf6ff;
+      --muted: #b2c6d9;
+      --accent: #4ecdc4;
+      --accent2: #8ecae6;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Tahoma, sans-serif;
+      background: linear-gradient(180deg, #071017 0%, #0a1520 100%);
+      color: var(--text);
+      line-height: 1.6;
+    }
+    .wrap { max-width: 1180px; margin: 0 auto; padding: 22px 16px 40px; }
+    .hero {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 24px;
+      background: linear-gradient(135deg, rgba(18,33,48,.96), rgba(14,27,40,.93));
+    }
+    h1 { margin: 0 0 10px; font-size: clamp(1.8rem, 4vw, 2.8rem); }
+    p { color: var(--muted); }
+    .nav { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+    .nav a {
+      text-decoration: none;
+      color: #05202c;
+      background: var(--accent);
+      border-radius: 999px;
+      padding: 7px 12px;
+      font-weight: 700;
+      font-size: .86rem;
+    }
+    .section {
+      margin-top: 18px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 18px;
+      background: linear-gradient(180deg, rgba(18,33,48,.95), rgba(15,28,41,.92));
+    }
+    .grid {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    }
+    .card {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: rgba(255,255,255,.03);
+      padding: 12px;
+    }
+    .card a { color: #aef4ff; text-decoration: none; font-weight: 700; }
+    pre {
+      background: #0a1320;
+      border: 1px solid #24415e;
+      border-radius: 10px;
+      padding: 11px;
+      overflow-x: auto;
+      color: #dff4ff;
+    }
+    code { font-family: Consolas, "Courier New", monospace; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="hero">
+      <h1>Citi Bike E-Bike Performance Hub</h1>
+      <p>Repositório dedicado a dados reais do Citi Bike para performance operacional, e-bike share, perfis de viagem, OLTP, OLAP, dbt, Streamlit e Machine Learning.</p>
+      <div class="nav">
+        <a href="docs/citibike_handbook.html">Handbook</a>
+        <a href="#run">Executar</a>
+        <a href="#docs">Docs</a>
+      </div>
+    </section>
+
+    <section class="section" id="run">
+      <h2>Quick Start</h2>
+      <pre><code>python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+python python/run_pipeline.py --months 1 --sample-rows-per-file 20000
+python python/ml_citibike.py
+streamlit run streamlit/app.py</code></pre>
+    </section>
+
+    <section class="section" id="docs">
+      <h2>Documentação</h2>
+      <div class="grid">
+        <article class="card">
+          <a href="docs/citibike_handbook.html">Citi Bike Handbook</a>
+          <p>Setup, instalação, teoria, Git/GitHub, dbt, SQL, OLTP, OLAP, ML, Streamlit e utilização do projeto.</p>
+        </article>
+        <article class="card">
+          <a href="README.md">README.md</a>
+          <p>Visão geral curta e comandos principais.</p>
+        </article>
+      </div>
+    </section>
+  </div>
+</body>
+</html>

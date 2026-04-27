@@ -1,0 +1,374 @@
+<!doctype html>
+<html lang="pt">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Citi Bike E-Bike Performance Handbook</title>
+  <style>
+    :root {
+      --ink: #17202a;
+      --muted: #5f6b76;
+      --line: #d8dee6;
+      --paper: #ffffff;
+      --soft: #f5f7fa;
+      --soft2: #eef6ff;
+      --accent: #0f766e;
+      --accent2: #1d4ed8;
+      --accent3: #7c3aed;
+      --codebg: #0f172a;
+      --codeink: #e5e7eb;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: Arial, Helvetica, sans-serif; background: var(--paper); color: var(--ink); line-height: 1.58; }
+    header {
+      min-height: 76vh;
+      display: grid;
+      align-items: end;
+      padding: 56px 24px 46px;
+      color: #fff;
+      background:
+        linear-gradient(rgba(15,23,42,.48), rgba(15,23,42,.76)),
+        url("https://images.unsplash.com/photo-1541625602330-2277a4c46182?auto=format&fit=crop&w=1800&q=80") center/cover;
+    }
+    .hero, main, nav .inner { width: min(1160px, 100%); margin: 0 auto; }
+    h1 { margin: 0 0 12px; max-width: 920px; font-size: clamp(2.3rem, 5vw, 4.8rem); line-height: 1.02; }
+    .subtitle { max-width: 840px; margin: 0; color: #eef4ff; font-size: 1.16rem; }
+    nav { position: sticky; top: 0; z-index: 10; background: rgba(255,255,255,.96); border-bottom: 1px solid var(--line); backdrop-filter: blur(8px); }
+    nav .inner { padding: 10px 24px; display: flex; gap: 8px; overflow-x: auto; white-space: nowrap; }
+    nav a { text-decoration: none; color: var(--ink); padding: 8px 10px; border-radius: 6px; font-size: .94rem; }
+    nav a:hover { background: var(--soft); }
+    main { padding: 32px 24px 72px; }
+    section { padding: 32px 0; border-bottom: 1px solid var(--line); }
+    h2 { margin: 0 0 16px; font-size: 2rem; }
+    h3 { margin: 24px 0 10px; font-size: 1.2rem; }
+    p { margin: 0 0 12px; }
+    ul, ol { padding-left: 22px; }
+    li { margin: 7px 0; }
+    .lead { max-width: 900px; color: var(--muted); font-size: 1.08rem; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 14px; margin: 18px 0; }
+    .card { border: 1px solid var(--line); border-radius: 8px; padding: 16px; background: #fff; }
+    .card strong { display: block; margin-bottom: 6px; color: var(--accent); }
+    .callout { margin: 18px 0; padding: 14px 16px; border-left: 4px solid var(--accent); background: #ecfdf5; }
+    .info { border-left-color: var(--accent2); background: var(--soft2); }
+    .warning { border-left-color: var(--accent3); background: #f5f3ff; }
+    code { background: #eef2f7; padding: 2px 5px; border-radius: 4px; font-family: Consolas, Monaco, "Courier New", monospace; }
+    pre { background: var(--codebg); color: var(--codeink); padding: 16px; border-radius: 8px; overflow-x: auto; font-size: .92rem; line-height: 1.5; }
+    pre code { background: transparent; color: inherit; padding: 0; }
+    table { width: 100%; border-collapse: collapse; margin: 16px 0; }
+    th, td { border: 1px solid var(--line); padding: 10px; text-align: left; vertical-align: top; }
+    th { background: var(--soft); }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="hero">
+      <h1>Citi Bike E-Bike Performance Handbook</h1>
+      <p class="subtitle">
+        Handbook completo para construir, instalar, executar, estudar e publicar um projeto com dados reais do Citi Bike,
+        com foco em performance operacional, e-bike usage, perfis de viagem, OLTP, OLAP, dbt, Streamlit, SQL, Git/GitHub e Machine Learning.
+      </p>
+    </div>
+  </header>
+
+  <nav>
+    <div class="inner">
+      <a href="#visao-geral">Visão Geral</a>
+      <a href="#problema">Problema</a>
+      <a href="#fontes">Fontes</a>
+      <a href="#repositorio">Repositório</a>
+      <a href="#estrutura">Estrutura</a>
+      <a href="#instalacao">Instalação</a>
+      <a href="#oltp">OLTP</a>
+      <a href="#olap">OLAP</a>
+      <a href="#dbt">dbt</a>
+      <a href="#streamlit">Streamlit</a>
+      <a href="#ml">ML</a>
+      <a href="#git">Git</a>
+      <a href="#atalhos">Atalhos</a>
+      <a href="#checklist">Checklist</a>
+    </div>
+  </nav>
+
+  <main>
+    <section id="visao-geral">
+      <h2>1. Visão Geral</h2>
+      <p class="lead">
+        Este repositório existe para estudar um sistema real de bicicletas partilhadas. O objetivo não é só visualizar viagens:
+        é perceber performance operacional, e-bike share, pressão sobre estações e perfis comportamentais de uso.
+      </p>
+      <div class="grid">
+        <div class="card"><strong>Dados reais</strong>Usa trip history oficial e feeds GBFS do Citi Bike.</div>
+        <div class="card"><strong>OLTP</strong>SQLite para armazenamento operacional e staging inicial.</div>
+        <div class="card"><strong>OLAP</strong>DuckDB para fact tables, agregações e consumo analítico.</div>
+        <div class="card"><strong>dbt</strong>Modelos e testes para governança da camada analítica.</div>
+        <div class="card"><strong>Streamlit</strong>Dashboard para KPIs, e-bike share e top stations.</div>
+        <div class="card"><strong>Machine Learning</strong>Classificação e clustering de perfis de viagem.</div>
+      </div>
+    </section>
+
+    <section id="problema">
+      <h2>2. Problema de Negócio</h2>
+      <p>
+        O sistema de bicicletas partilhadas precisa de responder a três perguntas centrais:
+      </p>
+      <ol>
+        <li>Quais estações estão em maior risco operacional?</li>
+        <li>Quando e onde o uso de e-bikes cresce mais?</li>
+        <li>Que grupos de uso existem nas viagens realizadas?</li>
+      </ol>
+      <div class="callout">
+        Neste caso falamos de <strong>perfis de viagem</strong> e não de perfis pessoais persistentes, porque o trip history público atual não expõe um identificador estável de utilizador.
+      </div>
+    </section>
+
+    <section id="fontes">
+      <h2>3. Fontes Oficiais</h2>
+      <ul>
+        <li>Citi Bike System Data: <code>https://citibikenyc.com/system-data</code></li>
+        <li>Trip history bucket: <code>https://s3.amazonaws.com/tripdata/</code></li>
+        <li>GBFS discovery: <code>https://gbfs.citibikenyc.com/gbfs/2.3/gbfs.json</code></li>
+        <li>GBFS specification: <code>https://gbfs.org/specification</code></li>
+      </ul>
+    </section>
+
+    <section id="repositorio">
+      <h2>4. Repositório e Publicação</h2>
+      <p>Se quiseres criar o repositório tu mesmo desde zero:</p>
+      <pre><code>cd /Users/carlosferreira/Projecto
+mkdir citibike_ebike_performance_repo
+cd citibike_ebike_performance_repo
+git init</code></pre>
+
+      <p>Quando já estiver tudo funcional, publica no GitHub:</p>
+      <pre><code>gh auth login
+gh repo create citibike-ebike-performance-repo --public --source . --remote origin --push</code></pre>
+    </section>
+
+    <section id="estrutura">
+      <h2>5. Estrutura do Repositório</h2>
+      <pre><code>.
+├── data/
+│   ├── raw/
+│   ├── processed/
+│   └── ml_outputs/
+├── dbt_citibike/
+├── docs/
+├── python/
+├── sql/
+│   ├── sqlite/
+│   └── duckdb/
+├── streamlit/
+├── .gitignore
+├── README.md
+├── index.html
+└── requirements.txt</code></pre>
+    </section>
+
+    <section id="instalacao">
+      <h2>6. Instalação</h2>
+      <pre><code>python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+pip install -r requirements.txt</code></pre>
+
+      <h3>6.1 GitHub CLI (`gh`)</h3>
+      <p>Se precisares de criar o repositório no GitHub via terminal, instala primeiro o GitHub CLI.</p>
+
+      <p>Com Homebrew:</p>
+      <pre><code>brew install gh</code></pre>
+
+      <p>Sem Homebrew, instalação local no utilizador:</p>
+      <pre><code>mkdir -p ~/.local/gh ~/bin
+cd ~/.local/gh
+curl -fL -o gh.zip https://github.com/cli/cli/releases/download/v2.91.0/gh_2.91.0_macOS_arm64.zip
+unzip -o gh.zip
+ln -sf ~/.local/gh/gh_2.91.0_macOS_arm64/bin/gh ~/bin/gh
+printf '\nexport PATH="$HOME/bin:$PATH"\n' >> ~/.zprofile</code></pre>
+
+      <p>Depois abre um novo terminal:</p>
+      <pre><code>gh --version
+gh auth login</code></pre>
+
+      <h3>6.2 Modo rápido com dados reais</h3>
+      <pre><code>python python/run_pipeline.py --months 1 --sample-rows-per-file 20000</code></pre>
+
+      <h3>6.3 Modo mais completo</h3>
+      <pre><code>python python/run_pipeline.py --months 3</code></pre>
+
+      <div class="callout info">
+        O modo sample usa dados reais oficiais, mas reduz o volume ingerido por ficheiro para acelerar testes locais.
+      </div>
+    </section>
+
+    <section id="oltp">
+      <h2>7. OLTP - SQLite</h2>
+      <p>
+        OLTP aqui funciona como base operacional/staging local. Guarda:
+      </p>
+      <ul>
+        <li><code>trips</code></li>
+        <li><code>stations</code></li>
+        <li><code>station_status_snapshots</code></li>
+        <li><code>vehicle_types</code></li>
+        <li><code>system_information</code></li>
+      </ul>
+
+      <h3>Porque esta camada existe</h3>
+      <ul>
+        <li>uniformiza o acesso a dados de trip history e GBFS;</li>
+        <li>permite staging local com SQL relacional;</li>
+        <li>separa ingestão bruta da modelagem analítica.</li>
+      </ul>
+
+      <h3>Comando</h3>
+      <pre><code>python python/setup_sqlite.py --sample-rows-per-file 20000</code></pre>
+    </section>
+
+    <section id="olap">
+      <h2>8. OLAP - DuckDB</h2>
+      <p>
+        A camada analítica cria tabelas para perguntas de negócio e dashboards:
+      </p>
+      <ul>
+        <li><code>fct_trips</code></li>
+        <li><code>dim_stations</code></li>
+        <li><code>fct_station_status</code></li>
+      </ul>
+
+      <h3>Objetivo</h3>
+      <ul>
+        <li>medir duração de viagem;</li>
+        <li>medir e-bike share por hora;</li>
+        <li>medir estações com maior procura;</li>
+        <li>detetar risco de esgotamento/saturação.</li>
+      </ul>
+
+      <h3>Comando</h3>
+      <pre><code>python python/setup_duckdb.py</code></pre>
+    </section>
+
+    <section id="dbt">
+      <h2>9. dbt - Governança</h2>
+      <p>
+        O projeto inclui uma camada dbt dedicada:
+      </p>
+      <pre><code>dbt_citibike/</code></pre>
+
+      <h3>Função</h3>
+      <ul>
+        <li>staging dos dados base;</li>
+        <li>marts analíticos reutilizáveis;</li>
+        <li>testes de qualidade e relacionamentos.</li>
+      </ul>
+
+      <h3>Executar</h3>
+      <pre><code>cd dbt_citibike
+cp profiles.example.yml profiles.yml
+export DBT_PROFILES_DIR=.
+dbt run
+dbt test</code></pre>
+
+      <h3>Base teórica mínima</h3>
+      <ul>
+        <li><strong>staging</strong>: normalização da origem.</li>
+        <li><strong>marts</strong>: camada final de consumo.</li>
+        <li><strong>tests</strong>: proteção contra quebras de qualidade.</li>
+      </ul>
+    </section>
+
+    <section id="streamlit">
+      <h2>10. Streamlit - Visualização</h2>
+      <p>O dashboard mostra uma primeira visão do sistema:</p>
+      <ul>
+        <li>total de viagens;</li>
+        <li>duração média;</li>
+        <li>percentagem de e-bike;</li>
+        <li>e-bike share por hora;</li>
+        <li>top start stations.</li>
+      </ul>
+
+      <h3>Comando</h3>
+      <pre><code>streamlit run streamlit/app.py</code></pre>
+    </section>
+
+    <section id="ml">
+      <h2>11. Machine Learning</h2>
+      <h3>Casos práticos incluídos</h3>
+      <table>
+        <thead>
+          <tr><th>Problema</th><th>Tipo</th><th>Objetivo</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Uso de e-bike</td><td>Classificação</td><td>Prever se uma viagem tem maior probabilidade de usar e-bike.</td></tr>
+          <tr><td>Perfis de viagem</td><td>Clustering</td><td>Encontrar grupos comportamentais com base em duração, hora, dia e tipo de utilizador.</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Comando</h3>
+      <pre><code>python python/ml_citibike.py</code></pre>
+
+      <h3>Base teórica mínima</h3>
+      <ul>
+        <li><strong>Classificação</strong>: prever classe alvo, aqui e-bike vs não e-bike.</li>
+        <li><strong>Clustering</strong>: agrupar viagens semelhantes sem rótulo.</li>
+        <li><strong>Accuracy</strong>: % de acertos na classificação.</li>
+      </ul>
+
+      <div class="callout warning">
+        Sem user ID persistente, este caso modela <strong>grupos de viagem</strong>, não grupos pessoais ao longo do tempo.
+      </div>
+    </section>
+
+    <section id="git">
+      <h2>12. Git e GitHub</h2>
+      <pre><code>git status
+git add .
+git commit -m "Initial Citi Bike e-bike performance case"
+git push</code></pre>
+
+      <p>Fluxo típico com GitHub CLI:</p>
+      <pre><code>gh auth login
+gh repo create citibike-ebike-performance-repo --public --source . --remote origin --push</code></pre>
+    </section>
+
+    <section id="atalhos">
+      <h2>13. Atalhos e Comandos Úteis</h2>
+      <h3>Pipeline</h3>
+      <pre><code>python python/run_pipeline.py --months 1 --sample-rows-per-file 20000
+python python/run_pipeline.py --months 3</code></pre>
+
+      <h3>dbt</h3>
+      <pre><code>dbt debug
+dbt run
+dbt test</code></pre>
+
+      <h3>DuckDB</h3>
+      <pre><code>duckdb data/processed/citibike_analytics.duckdb
+SHOW TABLES;
+DESCRIBE fct_trips;</code></pre>
+
+      <h3>SQLite</h3>
+      <pre><code>sqlite3 data/processed/citibike_oltp.db
+.tables</code></pre>
+
+      <h3>Streamlit</h3>
+      <pre><code>streamlit run streamlit/app.py</code></pre>
+    </section>
+
+    <section id="checklist">
+      <h2>14. Checklist Final</h2>
+      <ol>
+        <li>criar e ativar ambiente virtual;</li>
+        <li>instalar dependências;</li>
+        <li>descarregar dados oficiais do Citi Bike;</li>
+        <li>criar base OLTP em SQLite;</li>
+        <li>criar base OLAP em DuckDB;</li>
+        <li>executar dbt;</li>
+        <li>abrir dashboard Streamlit;</li>
+        <li>correr ML;</li>
+        <li>fazer commit e publicar no GitHub.</li>
+      </ol>
+    </section>
+  </main>
+</body>
+</html>
