@@ -8,6 +8,9 @@ Repositório autónomo com dados reais do Citi Bike para estudar:
 - OLTP, OLAP, dbt, SQL, Machine Learning e Streamlit;
 - preparação para publicação em GitHub.
 
+GitHub repository:
+- `https://github.com/JoseCCFerreira/citibike-ebike-performance-repo`
+
 ## Main Entry Points
 
 - Project hub: [index.html](index.html)
@@ -102,6 +105,10 @@ dbt test
 ```bash
 python python/validate_project.py
 ```
+
+## CI
+
+Neste momento este repositório não inclui workflow de GitHub Actions. A validação principal é local através de `python python/validate_project.py`.
 
 ## GitHub
 
