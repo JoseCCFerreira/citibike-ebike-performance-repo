@@ -76,18 +76,18 @@ def main() -> None:
         """
         CREATE OR REPLACE TABLE fct_station_status AS
         SELECT
-            snapshot_ts,
-            station_id,
-            num_bikes_available,
-            num_ebikes_available,
-            num_docks_available,
-            is_installed,
-            is_renting,
-            is_returning,
-            last_reported,
+            s.snapshot_ts,
+            s.station_id,
+            s.num_bikes_available,
+            s.num_ebikes_available,
+            s.num_docks_available,
+            s.is_installed,
+            s.is_renting,
+            s.is_returning,
+            s.last_reported,
             CASE
-                WHEN capacity IS NULL OR capacity = 0 THEN NULL
-                ELSE ROUND(num_bikes_available * 1.0 / capacity, 4)
+                WHEN st.capacity IS NULL OR st.capacity = 0 THEN NULL
+                ELSE ROUND(s.num_bikes_available * 1.0 / st.capacity, 4)
             END AS utilization_ratio
         FROM station_status_snapshots s
         LEFT JOIN stations st
