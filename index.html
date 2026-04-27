@@ -30,6 +30,12 @@
       padding: 24px;
       background: linear-gradient(135deg, rgba(18,33,48,.96), rgba(14,27,40,.93));
     }
+    .hero-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.65fr) minmax(280px, 1fr);
+      gap: 18px;
+      align-items: start;
+    }
     h1 { margin: 0 0 10px; font-size: clamp(1.8rem, 4vw, 2.8rem); }
     p { color: var(--muted); }
     .nav { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
@@ -61,6 +67,43 @@
       padding: 12px;
     }
     .card a { color: #aef4ff; text-decoration: none; font-weight: 700; }
+    .hero-panel {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: rgba(255,255,255,.03);
+      padding: 14px;
+    }
+    .hero-panel h3 { margin: 0 0 8px; }
+    .hero-panel ul { margin: 0; padding-left: 18px; color: var(--muted); }
+    .actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+    .actions a {
+      text-decoration: none;
+      border-radius: 10px;
+      padding: 8px 12px;
+      font-weight: 700;
+      font-size: .9rem;
+      border: 1px solid var(--line);
+      color: var(--text);
+      background: rgba(255,255,255,.04);
+    }
+    .actions a.primary {
+      color: #05202c;
+      background: var(--accent);
+    }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .stat {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: rgba(255,255,255,.03);
+      padding: 10px;
+    }
+    .stat strong { display: block; font-size: 1.3rem; color: #f2fbff; }
+    .stat span { color: var(--muted); font-size: .84rem; }
     pre {
       background: #0a1320;
       border: 1px solid #24415e;
@@ -70,17 +113,45 @@
       color: #dff4ff;
     }
     code { font-family: Consolas, "Courier New", monospace; }
+    @media (max-width: 780px) {
+      .hero-grid { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
 <body>
   <div class="wrap">
     <section class="hero">
-      <h1>Citi Bike E-Bike Performance Hub</h1>
-      <p>Repositório dedicado a dados reais do Citi Bike para performance operacional, e-bike share, perfis de viagem, OLTP, OLAP, dbt, Streamlit e Machine Learning.</p>
-      <div class="nav">
-        <a href="docs/citibike_handbook.html">Handbook</a>
-        <a href="#run">Executar</a>
-        <a href="#docs">Docs</a>
+      <div class="hero-grid">
+        <div>
+          <h1>Citi Bike E-Bike Performance Hub</h1>
+          <p>Case study com dados reais do Citi Bike para analisar performance operacional, adoção de e-bikes, pressão por estação e grupos comportamentais de viagem com OLTP, OLAP, dbt, Streamlit e Machine Learning.</p>
+          <div class="actions">
+            <a class="primary" href="docs/citibike_handbook.html">Abrir Handbook</a>
+            <a href="README.md">Ver README</a>
+            <a href="https://github.com/JoseCCFerreira/citibike-ebike-performance-repo">Ver GitHub</a>
+          </div>
+          <div class="nav">
+            <a href="#run">Executar</a>
+            <a href="#why">Caso de estudo</a>
+            <a href="#docs">Docs</a>
+          </div>
+        </div>
+
+        <aside class="hero-panel">
+          <h3>O que este projeto responde</h3>
+          <ul>
+            <li>que estações ficam mais perto de rutura ou saturação;</li>
+            <li>como varia o uso de e-bikes ao longo do dia;</li>
+            <li>que grupos de viagem existem no sistema;</li>
+            <li>como montar uma stack analítica com dados reais públicos.</li>
+          </ul>
+          <div class="stats">
+            <div class="stat"><strong>Real</strong><span>dados oficiais Citi Bike</span></div>
+            <div class="stat"><strong>3</strong><span>camadas principais de dados</span></div>
+            <div class="stat"><strong>dbt</strong><span>governação analítica</span></div>
+            <div class="stat"><strong>ML</strong><span>classificação e clustering</span></div>
+          </div>
+        </aside>
       </div>
     </section>
 
@@ -92,6 +163,24 @@ pip install -r requirements.txt
 python python/run_pipeline.py --months 1 --sample-rows-per-file 20000
 python python/ml_citibike.py
 streamlit run streamlit/app.py</code></pre>
+    </section>
+
+    <section class="section" id="why">
+      <h2>Porque este caso é forte para portefólio</h2>
+      <div class="grid">
+        <article class="card">
+          <a href="docs/citibike_handbook.html#problema">Problema de negócio</a>
+          <p>Foca risco operacional, e-bike share e pressão sobre estações com perguntas que fazem sentido no mundo real.</p>
+        </article>
+        <article class="card">
+          <a href="docs/citibike_handbook.html#olap">Camada analítica</a>
+          <p>Cria fact tables e dimensões em DuckDB para responder rapidamente a perguntas de performance e procura.</p>
+        </article>
+        <article class="card">
+          <a href="docs/citibike_handbook.html#ml">Machine Learning</a>
+          <p>Inclui classificação de uso de e-bike e clustering de perfis de viagem, com limitações dos dados explicadas.</p>
+        </article>
+      </div>
     </section>
 
     <section class="section" id="docs">

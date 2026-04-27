@@ -51,6 +51,22 @@
     .callout { margin: 18px 0; padding: 14px 16px; border-left: 4px solid var(--accent); background: #ecfdf5; }
     .info { border-left-color: var(--accent2); background: var(--soft2); }
     .warning { border-left-color: var(--accent3); background: #f5f3ff; }
+    .hero-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+    .hero-actions a {
+      text-decoration: none;
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: .95rem;
+      border: 1px solid rgba(255,255,255,.24);
+      color: #fff;
+      background: rgba(255,255,255,.08);
+    }
+    .hero-actions a.primary {
+      background: #4ecdc4;
+      color: #05202c;
+      border-color: rgba(78,205,196,.45);
+    }
     code { background: #eef2f7; padding: 2px 5px; border-radius: 4px; font-family: Consolas, Monaco, "Courier New", monospace; }
     pre { background: var(--codebg); color: var(--codeink); padding: 16px; border-radius: 8px; overflow-x: auto; font-size: .92rem; line-height: 1.5; }
     pre code { background: transparent; color: inherit; padding: 0; }
@@ -67,6 +83,11 @@
         Handbook completo para construir, instalar, executar, estudar e publicar um projeto com dados reais do Citi Bike,
         com foco em performance operacional, e-bike usage, perfis de viagem, OLTP, OLAP, dbt, Streamlit, SQL, Git/GitHub e Machine Learning.
       </p>
+      <div class="hero-actions">
+        <a class="primary" href="../index.html">Abrir Hub do Projeto</a>
+        <a href="../README.md">Abrir README</a>
+        <a href="https://github.com/JoseCCFerreira/citibike-ebike-performance-repo">Ver GitHub</a>
+      </div>
     </div>
   </header>
 
@@ -96,6 +117,9 @@
         Este repositório existe para estudar um sistema real de bicicletas partilhadas. O objetivo não é só visualizar viagens:
         é perceber performance operacional, e-bike share, pressão sobre estações e perfis comportamentais de uso.
       </p>
+      <div class="callout info">
+        Em portefólio, este caso funciona muito bem porque combina dados públicos reais, problema operacional claro, modelação analítica e uma explicação honesta das limitações do dataset.
+      </div>
       <div class="grid">
         <div class="card"><strong>Dados reais</strong>Usa trip history oficial e feeds GBFS do Citi Bike.</div>
         <div class="card"><strong>OLTP</strong>SQLite para armazenamento operacional e staging inicial.</div>
@@ -103,6 +127,13 @@
         <div class="card"><strong>dbt</strong>Modelos e testes para governança da camada analítica.</div>
         <div class="card"><strong>Streamlit</strong>Dashboard para KPIs, e-bike share e top stations.</div>
         <div class="card"><strong>Machine Learning</strong>Classificação e clustering de perfis de viagem.</div>
+      </div>
+
+      <h3>Como usar este handbook</h3>
+      <div class="grid">
+        <div class="card"><strong>Quero montar rápido</strong>Segue <code>Instalação</code>, <code>OLTP</code>, <code>OLAP</code>, <code>dbt</code> e <code>Streamlit</code>.</div>
+        <div class="card"><strong>Quero explicar o caso</strong>Lê <code>Problema de Negócio</code>, <code>Fontes Oficiais</code> e <code>Machine Learning</code>.</div>
+        <div class="card"><strong>Quero publicar</strong>Fecha com <code>Git e GitHub</code> e o <code>Checklist Final</code>.</div>
       </div>
     </section>
 
