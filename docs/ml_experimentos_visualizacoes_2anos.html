@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="pt">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ML, Comparacao, Visualizacoes e Dados 2 Anos - Citi Bike</title>
+  <style>
+    :root { --bg:#071017; --panel:#122130; --line:#23405a; --text:#ecf6ff; --muted:#b2c6d9; --accent:#4ecdc4; --accent2:#ffd166; --soft:rgba(255,255,255,.04); }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family:"Segoe UI", Tahoma, sans-serif; color:var(--text); background:linear-gradient(180deg,var(--bg),#0a1520); line-height:1.65; }
+    .wrap { max-width:1180px; margin:0 auto; padding:24px 16px 44px; }
+    header, section { border:1px solid var(--line); border-radius:16px; background:linear-gradient(180deg,rgba(18,33,48,.96),rgba(15,28,41,.93)); padding:18px; margin-bottom:16px; }
+    h1,h2,h3 { margin:0 0 10px; line-height:1.25; }
+    h1 { font-size:clamp(1.7rem,4vw,2.6rem); }
+    h2 { color:var(--accent); font-size:1.25rem; }
+    h3 { color:var(--accent2); font-size:1rem; margin-top:14px; }
+    p,li,td { color:var(--muted); }
+    a { color:#aef4ff; font-weight:700; text-decoration:none; }
+    a:hover { text-decoration:underline; }
+    code,pre { font-family:Consolas,"Courier New",monospace; }
+    code { background:rgba(255,255,255,.06); padding:2px 5px; border-radius:4px; }
+    pre { background:#0a1320; border:1px solid #24415e; border-radius:10px; color:#dff4ff; overflow-x:auto; padding:12px; }
+    .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:12px; }
+    .card { border:1px solid var(--line); border-radius:12px; background:var(--soft); padding:12px; }
+    .card strong { display:block; color:#f2fbff; margin-bottom:6px; }
+    .table-wrap { overflow-x:auto; }
+    table { width:100%; min-width:900px; border-collapse:collapse; margin-top:8px; }
+    th,td { border-bottom:1px solid #26425c; padding:9px 10px; text-align:left; vertical-align:top; }
+    th { background:rgba(78,205,196,.14); color:#e9fbff; }
+    .callout { border-left:4px solid var(--accent); border-radius:10px; background:rgba(78,205,196,.08); padding:11px 13px; margin-top:12px; color:#d8ecff; }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <header>
+      <h1>Citi Bike: ML, Comparacao, Visualizacoes e Dados de 2 Anos</h1>
+      <p>Guia para expandir o caso Citi Bike com mais experiencias de Machine Learning, validacao comparavel, visualizacoes e download dos ultimos dois anos oficiais.</p>
+      <p><a href="../index.html">Hub</a> · <a href="explicacao_teorica_codigo_outputs.html">Codigo + outputs</a> · <a href="uniformizacao_codigo_documentacao.html">Uniformizacao</a></p>
+    </header>
+
+    <section>
+      <h2>1. Descarregar os ultimos 2 anos</h2>
+      <p>O script agora aceita <code>--years 2</code>. Em 28/04/2026, a consulta ao bucket oficial seleciona 24 meses completos, de <code>202404</code> a <code>202603</code>, com 48 archives no total porque existem ficheiros Citi Bike NYC e JC. Como os ZIPs podem ser grandes, valida primeiro com amostragem na ingestao.</p>
+      <pre><code>python python/run_pipeline.py --years 2 --sample-rows-per-file 20000
+python python/ml_citibike.py
+streamlit run streamlit/app.py</code></pre>
+      <p>Para ingerir tudo depois de confirmares espaco e tempo:</p>
+      <pre><code>python python/run_pipeline.py --years 2
+python python/ml_citibike.py</code></pre>
+      <div class="callout">Modo recomendado para poupar disco: usa sempre <code>--sample-rows-per-file</code>. Nesse modo, o script descarrega cada ZIP oficial, extrai apenas a amostra configurada e apaga o ZIP logo de seguida. Assim consegues cobrir os 24 meses sem deixar dezenas de GB em <code>data/raw/</code>.</div>
+    </section>
+
+    <section>
+      <h2>2. Casos de ML que podes testar e comparar</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Caso</th><th>Objetivo</th><th>Modelos candidatos</th><th>Metricas</th><th>Visualizacao</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>Classificar uso de e-bike</td>
+              <td>Prever se uma viagem usa bicicleta eletrica.</td>
+              <td>Logistic Regression, Random Forest, Gradient Boosting, XGBoost/LightGBM.</td>
+              <td>Accuracy, ROC AUC, F1, confusion matrix.</td>
+              <td>Feature importance, ROC, matriz de confusao.</td>
+            </tr>
+            <tr>
+              <td>Prever duracao da viagem</td>
+              <td>Estimar <code>trip_minutes</code>.</td>
+              <td>Linear Regression, Random Forest Regressor, Gradient Boosting.</td>
+              <td>MAE, RMSE, R2, erro por hora/estacao.</td>
+              <td>Real vs previsto, residuos por hora.</td>
+            </tr>
+            <tr>
+              <td>Clusters de viagens</td>
+              <td>Descobrir perfis de utilizacao.</td>
+              <td>K-Means, Gaussian Mixture, HDBSCAN/DBSCAN.</td>
+              <td>Silhouette, Davies-Bouldin, estabilidade temporal.</td>
+              <td>Scatter hora vs duracao, mapa por estacao.</td>
+            </tr>
+            <tr>
+              <td>Prever member vs casual</td>
+              <td>Classificar tipo de utilizador.</td>
+              <td>Logistic Regression, Random Forest, Gradient Boosting.</td>
+              <td>F1 macro, ROC AUC, recall por classe.</td>
+              <td>Heatmap hora/dia por tipo de utilizador.</td>
+            </tr>
+            <tr>
+              <td>Forecast de procura</td>
+              <td>Prever numero de viagens por hora/dia.</td>
+              <td>Moving average, Exponential Smoothing, ARIMA/Prophet.</td>
+              <td>MAE temporal, MAPE, backtesting.</td>
+              <td>Linha historico vs forecast por hora/dia.</td>
+            </tr>
+            <tr>
+              <td>Risco de estacao</td>
+              <td>Identificar estações perto de vazio/saturacao.</td>
+              <td>Rules baseline, Isolation Forest, classificacao se houver labels.</td>
+              <td>Taxa de alerta, cobertura, inspecao operacional.</td>
+              <td>Ranking de utilizacao, mapa, barras por disponibilidade.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section>
+      <h2>3. O que ja ficou integrado no dashboard</h2>
+      <div class="grid">
+        <article class="card"><strong>Risco de estações</strong>Mostra utilizacao e disponibilidade no snapshot GBFS mais recente.</article>
+        <article class="card"><strong>Feature importance</strong>Mostra que sinais explicam melhor a escolha de e-bike.</article>
+        <article class="card"><strong>Clusters de viagem</strong>Mostra perfis medios por hora, duracao, membro e e-bike.</article>
+      </div>
+    </section>
+
+    <section>
+      <h2>4. Como validar e comparar</h2>
+      <pre><code>python python/run_pipeline.py --years 2 --sample-rows-per-file 20000
+python python/ml_citibike.py
+python python/validate_project.py
+streamlit run streamlit/app.py</code></pre>
+      <p>Compara modelos sempre com a mesma janela de meses. Para validação mais honesta, evita dividir aleatoriamente quando estiveres a fazer forecasting: usa treino em meses antigos e teste nos meses mais recentes.</p>
+    </section>
+  </main>
+</body>
+</html>

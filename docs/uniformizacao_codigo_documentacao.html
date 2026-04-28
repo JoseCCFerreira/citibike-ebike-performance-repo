@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="pt">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Uniformizacao de Codigo e Documentacao</title>
+  <style>
+    :root {
+      --bg: #071017;
+      --panel: #122130;
+      --line: #23405a;
+      --text: #ecf6ff;
+      --muted: #b2c6d9;
+      --accent: #4ecdc4;
+      --accent2: #ffd166;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Tahoma, sans-serif;
+      line-height: 1.65;
+      color: var(--text);
+      background: linear-gradient(180deg, var(--bg), #0a1520);
+    }
+    .wrap { max-width: 1160px; margin: 0 auto; padding: 24px 16px 42px; }
+    header, section {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: linear-gradient(180deg, rgba(18,33,48,.96), rgba(15,28,41,.93));
+      padding: 18px;
+      margin-bottom: 16px;
+    }
+    h1, h2, h3 { margin: 0 0 10px; color: #f2fbff; line-height: 1.25; }
+    h1 { font-size: clamp(1.7rem, 4vw, 2.5rem); }
+    h2 { font-size: 1.25rem; color: var(--accent); }
+    h3 { font-size: 1rem; color: var(--accent2); }
+    p, li { color: var(--muted); }
+    a { color: #aef4ff; font-weight: 700; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    code, pre { font-family: Consolas, "Courier New", monospace; }
+    pre {
+      background: #0a1320;
+      border: 1px solid #24415e;
+      border-radius: 10px;
+      padding: 11px;
+      overflow-x: auto;
+      color: #dff4ff;
+    }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 12px; }
+    .card {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: rgba(255,255,255,.03);
+      padding: 12px;
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; min-width: 760px; }
+    th, td {
+      border-bottom: 1px solid #26425c;
+      padding: 8px 10px;
+      text-align: left;
+      vertical-align: top;
+      color: #d3e6f9;
+    }
+    th { background: rgba(78,205,196,.14); color: #e9fbff; }
+    .callout {
+      border-left: 4px solid var(--accent);
+      background: rgba(78,205,196,.08);
+      padding: 10px 12px;
+      border-radius: 10px;
+      color: #d8ecff;
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <header>
+      <h1>Uniformizacao de Codigo e Documentacao</h1>
+      <p>Este documento explica a parte comum entre o repositorio Citi Bike e o repositorio Retail Analytics. A ideia e simples: dominios diferentes, mas a mesma forma de organizar codigo, executar pipelines, validar resultados e explicar o projeto.</p>
+      <p><a href="../index.html">Voltar ao hub Citi Bike</a> · <a href="tutorial_utilizacao_teoria_citibike.html">Abrir tutorial Citi Bike</a></p>
+    </header>
+
+    <section>
+      <h2>1. Contrato comum entre os dois repositorios</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Camada</th>
+              <th>Padrao comum</th>
+              <th>Retail Analytics</th>
+              <th>Citi Bike</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Entrada do projeto</td>
+              <td><code>README.md</code> para comandos curtos e <code>index.html</code> como hub navegavel.</td>
+              <td>Explica retail, Black Friday, Deep Learning, CI e publicacao.</td>
+              <td>Explica dados reais Citi Bike, e-bikes, estacoes e publicacao.</td>
+            </tr>
+            <tr>
+              <td>Python pipeline</td>
+              <td><code>python/run_pipeline.py</code> orquestra preparacao de dados.</td>
+              <td>Gera CSVs sinteticos, SQLite OLTP e DuckDB analitico.</td>
+              <td>Descarrega/amostra dados reais, cria SQLite OLTP e DuckDB analitico.</td>
+            </tr>
+            <tr>
+              <td>OLTP</td>
+              <td><code>sql/sqlite/01_create_tables.sql</code> e <code>python/setup_sqlite.py</code>.</td>
+              <td>Clientes, produtos, lojas, transacoes e itens de venda.</td>
+              <td>Viagens, estacoes e estado operacional das estacoes.</td>
+            </tr>
+            <tr>
+              <td>OLAP</td>
+              <td><code>sql/duckdb/01_analytical_queries.sql</code> e <code>python/setup_duckdb.py</code>.</td>
+              <td>Receita, margem, categorias, lojas e campanhas.</td>
+              <td>Procura, duracao, e-bike share, origem/destino e pressao por estacao.</td>
+            </tr>
+            <tr>
+              <td>dbt</td>
+              <td>Projeto dbt com <code>models/staging</code>, <code>models/marts</code> e <code>models/schema.yml</code>.</td>
+              <td><code>dbt_retail_analytics</code> com fact sales e dim products.</td>
+              <td><code>dbt_citibike</code> com fact trips e dim stations.</td>
+            </tr>
+            <tr>
+              <td>Machine Learning</td>
+              <td><code>python/ml_*.py</code> grava metricas e outputs em <code>data/ml_outputs/</code>.</td>
+              <td>Regressao/segmentacao sobre vendas e comportamento comercial.</td>
+              <td>Classificacao de e-bike e clustering de perfis de viagem.</td>
+            </tr>
+            <tr>
+              <td>Visualizacao</td>
+              <td><code>streamlit/app.py</code> abre a experiencia principal em browser.</td>
+              <td>KPIs comerciais, receita, produtos, lojas e casos especiais.</td>
+              <td>KPIs operacionais, viagens, estacoes, e-bikes e clusters.</td>
+            </tr>
+            <tr>
+              <td>Validacao</td>
+              <td><code>python/validate_project.py</code> confirma ficheiros, dados e execucao basica.</td>
+              <td>Inclui opcao de validar dbt e workflow CI.</td>
+              <td>Validacao local focada no pipeline Citi Bike.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section>
+      <h2>2. Porque esta uniformizacao ajuda</h2>
+      <div class="grid">
+        <article class="card">
+          <h3>Onboarding mais facil</h3>
+          <p>Quem aprende um repositorio consegue abrir o outro sem reaprender a estrutura. A pasta muda de dominio, mas os nomes principais continuam previsiveis.</p>
+        </article>
+        <article class="card">
+          <h3>Comparacao tecnica limpa</h3>
+          <p>Retail usa dados sinteticos e Citi Bike usa dados reais. Como a arquitetura e semelhante, a diferenca fica no problema de negocio, nao na confusao da organizacao.</p>
+        </article>
+        <article class="card">
+          <h3>Documentacao explicavel</h3>
+          <p>README, hub HTML, handbook e tutorial cumprem papeis diferentes: arranque rapido, navegacao, teoria completa e leitura guiada do codigo.</p>
+        </article>
+      </div>
+    </section>
+
+    <section>
+      <h2>3. Mapa mental para explicar em entrevista</h2>
+      <pre><code>README.md / index.html
+  -> mostram como entrar no projeto
+
+python/
+  -> prepara dados, cria bases e executa modelos
+
+sql/
+  -> guarda SQL reutilizavel para OLTP e OLAP
+
+dbt_*/
+  -> transforma dados em modelos governados, testados e documentaveis
+
+streamlit/
+  -> transforma outputs tecnicos em experiencia visual
+
+docs/
+  -> explica teoria, utilizacao, decisoes tecnicas e limites do projeto</code></pre>
+      <div class="callout">Frase curta: "Uniformizei os dois repositorios para terem a mesma arquitetura de aprendizagem e entrega. Assim consigo demonstrar dois dominios diferentes com uma base tecnica consistente: pipeline, SQL, dbt, ML, dashboard, validacao e documentacao."</div>
+    </section>
+
+    <section>
+      <h2>4. O que ainda pode ser evoluido</h2>
+      <ul>
+        <li>Adicionar CI ao repositorio Citi Bike, espelhando o fluxo cross-platform do Retail.</li>
+        <li>Adicionar scripts npm equivalentes no Citi Bike, se quiseres a mesma experiencia de comandos auxiliares.</li>
+        <li>Criar uma pagina comparativa externa, fora dos repositorios, para apresentar os dois projetos como portfolio conjunto.</li>
+      </ul>
+    </section>
+  </main>
+</body>
+</html>

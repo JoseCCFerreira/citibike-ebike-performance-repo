@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import duckdb
@@ -10,6 +11,7 @@ import streamlit as st
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
 DB_PATH = ROOT_DIR / "data" / "processed" / "citibike_analytics.duckdb"
+ML_OUTPUT_DIR = ROOT_DIR / "data" / "ml_outputs"
 
 
 @st.cache_data
@@ -67,6 +69,66 @@ def load_top_stations() -> pd.DataFrame:
     return df
 
 
+@st.cache_data
+def load_station_risk() -> pd.DataFrame:
+    conn = duckdb.connect(str(DB_PATH), read_only=True)
+    df = conn.execute(
+        """
+        WITH latest_snapshot AS (
+            SELECT MAX(snapshot_ts) AS snapshot_ts
+            FROM fct_station_status
+        )
+        SELECT
+            s.name AS station_name,
+            st.num_bikes_available,
+            st.num_ebikes_available,
+            st.num_docks_available,
+            st.utilization_ratio
+        FROM fct_station_status st
+        LEFT JOIN dim_stations s
+            ON s.station_id = st.station_id
+        INNER JOIN latest_snapshot ls
+            ON ls.snapshot_ts = st.snapshot_ts
+        ORDER BY st.utilization_ratio DESC NULLS LAST
+        LIMIT 20
+        """
+    ).df()
+    conn.close()
+    return df
+
+
+def build_citibike_metric_frame(metrics: dict) -> pd.DataFrame:
+    rows = []
+    classification = metrics.get("classification_ebike_usage", {})
+    if "accuracy" in classification:
+        rows.append({"model": "Random Forest", "Accuracy": classification.get("accuracy")})
+    else:
+        for model_name, values in classification.items():
+            rows.append(
+                {
+                    "model": model_name,
+                    "Accuracy": values.get("Accuracy"),
+                    "Precision": values.get("Precision"),
+                    "Recall": values.get("Recall"),
+                    "F1": values.get("F1"),
+                    "ROC_AUC": values.get("ROC_AUC"),
+                }
+            )
+    return pd.DataFrame(rows)
+
+
+@st.cache_data
+def load_ml_outputs() -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    importance_path = ML_OUTPUT_DIR / "ebike_feature_importance.csv"
+    clusters_path = ML_OUTPUT_DIR / "trip_profile_clusters.csv"
+    metrics_path = ML_OUTPUT_DIR / "citibike_ml_metrics.json"
+    importance_df = pd.read_csv(importance_path) if importance_path.exists() else pd.DataFrame()
+    clusters_df = pd.read_csv(clusters_path) if clusters_path.exists() else pd.DataFrame()
+    metrics = json.loads(metrics_path.read_text(encoding="utf-8")) if metrics_path.exists() else {}
+    metrics_df = build_citibike_metric_frame(metrics)
+    return importance_df, clusters_df, metrics_df
+
+
 def main() -> None:
     st.set_page_config(page_title="Citi Bike E-Bike Performance", layout="wide")
     st.title("Citi Bike E-Bike Performance Dashboard")
@@ -89,6 +151,51 @@ def main() -> None:
     fig_stations = px.bar(top_stations, x="station_name", y="trip_count", title="Top Start Stations by Trips")
     st.plotly_chart(fig_stations, use_container_width=True)
     st.dataframe(top_stations, use_container_width=True)
+
+    station_risk = load_station_risk()
+    fig_risk = px.bar(
+        station_risk,
+        x="station_name",
+        y="utilization_ratio",
+        color="num_ebikes_available",
+        title="Station Utilization Risk in Latest GBFS Snapshot",
+    )
+    st.plotly_chart(fig_risk, use_container_width=True)
+
+    importance, clusters, model_metrics = load_ml_outputs()
+    if not importance.empty or not clusters.empty or not model_metrics.empty:
+        st.subheader("Machine Learning: entender, aplicar e analisar")
+    if not model_metrics.empty:
+        metric_column = "F1" if "F1" in model_metrics.columns and model_metrics["F1"].notna().any() else "Accuracy"
+        fig_models = px.bar(
+            model_metrics.sort_values(metric_column, ascending=False),
+            x="model",
+            y=metric_column,
+            title=f"Comparação de Modelos de E-Bike por {metric_column}",
+        )
+        st.plotly_chart(fig_models, use_container_width=True)
+        st.dataframe(model_metrics, use_container_width=True)
+    if not importance.empty:
+        fig_importance = px.bar(
+            importance,
+            x="importance",
+            y="feature",
+            orientation="h",
+            title="Feature Importance for E-Bike Usage",
+        )
+        st.plotly_chart(fig_importance, use_container_width=True)
+    if not clusters.empty:
+        fig_clusters = px.scatter(
+            clusters,
+            x="start_hour",
+            y="trip_minutes",
+            size="is_ebike",
+            color=clusters["trip_profile_cluster"].astype(str),
+            title="Trip Profile Clusters",
+            labels={"color": "trip_profile_cluster"},
+        )
+        st.plotly_chart(fig_clusters, use_container_width=True)
+        st.dataframe(clusters, use_container_width=True)
 
 
 if __name__ == "__main__":

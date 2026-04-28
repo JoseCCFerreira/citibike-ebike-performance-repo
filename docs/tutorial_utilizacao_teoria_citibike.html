@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="pt">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tutorial de Utilizacao e Teoria - Citi Bike</title>
+  <style>
+    :root {
+      --bg: #08111a;
+      --card: #122130;
+      --line: #26435d;
+      --text: #edf8ff;
+      --muted: #b7cadb;
+      --accent: #4ecdc4;
+      --accent-2: #8ecae6;
+      --soft: rgba(255,255,255,.04);
+      --ok: #8de2a4;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: linear-gradient(180deg, #08111a 0%, #101a28 100%);
+      color: var(--text);
+      line-height: 1.62;
+    }
+    .wrap { max-width: 1160px; margin: 0 auto; padding: 24px 16px 48px; }
+    .hero, .section {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: linear-gradient(180deg, rgba(18,33,48,.96), rgba(15,27,40,.94));
+      padding: 20px;
+      margin-bottom: 14px;
+    }
+    h1, h2, h3 { margin: 0 0 10px; }
+    h1 { font-size: clamp(1.9rem, 4vw, 3rem); }
+    h2 { font-size: 1.35rem; color: #ecfbff; }
+    h3 { font-size: 1.02rem; color: #bfefff; margin-top: 18px; }
+    p, li { color: var(--muted); }
+    .actions, .toc {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 14px;
+    }
+    .actions a, .toc a {
+      text-decoration: none;
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-weight: 700;
+      font-size: .9rem;
+      border: 1px solid var(--line);
+    }
+    .actions a {
+      background: var(--accent);
+      color: #122130;
+    }
+    .toc a {
+      background: var(--soft);
+      color: var(--text);
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 12px;
+      margin-top: 12px;
+    }
+    .card {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--soft);
+      padding: 14px;
+    }
+    .card strong {
+      display: block;
+      margin-bottom: 6px;
+      color: #ecfbff;
+    }
+    .callout {
+      border-left: 4px solid var(--accent-2);
+      background: rgba(142,202,230,.08);
+      border-radius: 10px;
+      padding: 12px 14px;
+      margin: 12px 0;
+    }
+    .ok {
+      border-left-color: var(--ok);
+      background: rgba(141,226,164,.08);
+    }
+    code, pre { font-family: Consolas, "Courier New", monospace; }
+    code {
+      background: rgba(255,255,255,.06);
+      padding: 2px 5px;
+      border-radius: 4px;
+    }
+    pre {
+      background: #09121d;
+      border: 1px solid #274764;
+      border-radius: 12px;
+      padding: 12px;
+      overflow-x: auto;
+      color: #def1ff;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    th, td {
+      border-bottom: 1px solid #274764;
+      text-align: left;
+      padding: 9px 10px;
+      vertical-align: top;
+      color: var(--muted);
+    }
+    th { color: #eefcff; background: rgba(255,255,255,.04); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="hero">
+      <h1>Tutorial de Utilizacao e Teoria do Caso Citi Bike</h1>
+      <p>Este tutorial explica como usar o projeto Citi Bike, como ler o código, o que as camadas de dados estão a fazer, como interpretar os outputs de Machine Learning e que análises podes aprofundar a partir de dados reais.</p>
+      <div class="actions">
+        <a href="../index.html">Voltar ao Hub</a>
+        <a href="../README.md">Abrir README</a>
+        <a href="citibike_handbook.html">Abrir Handbook</a>
+        <a href="explicacao_teorica_codigo_outputs.html">Codigo + Outputs</a>
+      </div>
+      <div class="toc">
+        <a href="#visao">Visao Geral</a>
+        <a href="#execucao">Execucao</a>
+        <a href="#codigo">Codigo</a>
+        <a href="#teoria">Teoria</a>
+        <a href="#outputs">Outputs</a>
+        <a href="#analises">Mais Analises</a>
+      </div>
+    </section>
+
+    <section class="section" id="visao">
+      <h2>1. O que este caso quer resolver</h2>
+      <p>Este projeto usa dados públicos reais do Citi Bike para responder a perguntas operacionais e analíticas. Em vez de estudar só “viagens de bicicleta”, estudas um sistema urbano com pressão sobre estações, adoção de e-bikes, procura temporal e perfis de utilização.</p>
+      <div class="grid">
+        <div class="card"><strong>Dados reais</strong>Trip history oficial e snapshots GBFS do sistema.</div>
+        <div class="card"><strong>OLTP</strong>SQLite como staging operacional local.</div>
+        <div class="card"><strong>OLAP</strong>DuckDB para fact tables e análise agregada.</div>
+        <div class="card"><strong>dbt</strong>Governação da camada analítica com SQL e testes.</div>
+        <div class="card"><strong>ML</strong>Classificação de uso de e-bike e clustering de perfis de viagem.</div>
+        <div class="card"><strong>Dashboard</strong>Leitura rápida de KPIs e estações relevantes.</div>
+      </div>
+      <div class="callout ok">
+        Este caso é especialmente forte para portefólio porque mostra trabalho com dados públicos reais, ingestão, modelação analítica e interpretação de limitações do dataset.
+      </div>
+    </section>
+
+    <section class="section" id="execucao">
+      <h2>2. Como usar o projeto</h2>
+      <h3>2.1 Preparar ambiente</h3>
+      <pre><code>python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+pip install -r requirements.txt</code></pre>
+
+      <h3>2.2 Modo rápido com dados reais</h3>
+      <pre><code>python python/run_pipeline.py --months 1 --sample-rows-per-file 20000</code></pre>
+      <p>Isto faz três passos:</p>
+      <ul>
+        <li>download dos dados do Citi Bike;</li>
+        <li>carga para SQLite;</li>
+        <li>transformação para DuckDB.</li>
+      </ul>
+
+      <h3>2.3 Correr Machine Learning</h3>
+      <pre><code>python python/ml_citibike.py</code></pre>
+
+      <h3>2.4 Abrir dashboard</h3>
+      <pre><code>streamlit run streamlit/app.py</code></pre>
+
+      <h3>2.5 Validacao completa</h3>
+      <pre><code>python python/validate_project.py</code></pre>
+    </section>
+
+    <section class="section" id="codigo">
+      <h2>3. Explicacao do codigo e da responsabilidade de cada ficheiro</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Ficheiro</th>
+            <th>O que faz</th>
+            <th>Porque importa</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>python/download_citibike_data.py</code></td>
+            <td>Descarrega archives de trip history e snapshots GBFS.</td>
+            <td>É a porta de entrada dos dados reais. Sem esta camada, o resto do projeto não arranca.</td>
+          </tr>
+          <tr>
+            <td><code>python/setup_sqlite.py</code></td>
+            <td>Cria a base SQLite e normaliza a ingestão dos CSVs e snapshots.</td>
+            <td>Serve como staging local e resolve diferenças entre ficheiros fonte.</td>
+          </tr>
+          <tr>
+            <td><code>python/setup_duckdb.py</code></td>
+            <td>Cria <code>fct_trips</code>, <code>dim_stations</code> e <code>fct_station_status</code>.</td>
+            <td>Transforma dados crus em estruturas analíticas de leitura fácil.</td>
+          </tr>
+          <tr>
+            <td><code>dbt_citibike/models/</code></td>
+            <td>Aplica staging e marts governados por dbt.</td>
+            <td>Ajuda a garantir qualidade e consistência da camada analítica.</td>
+          </tr>
+          <tr>
+            <td><code>python/ml_citibike.py</code></td>
+            <td>Treina modelos para uso de e-bike e perfis de viagem.</td>
+            <td>Transforma dados operacionais em hipóteses preditivas e segmentação.</td>
+          </tr>
+          <tr>
+            <td><code>streamlit/app.py</code></td>
+            <td>Mostra KPIs e gráficos a partir do DuckDB.</td>
+            <td>Permite validar rapidamente se a camada analítica faz sentido.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>3.1 Como pensar o código em blocos</h3>
+      <ul>
+        <li><strong>aquisição</strong>: buscar dados oficiais;</li>
+        <li><strong>staging</strong>: pôr os dados em forma relacional;</li>
+        <li><strong>modelação</strong>: criar entidades analíticas úteis;</li>
+        <li><strong>consumo</strong>: dashboard e ML.</li>
+      </ul>
+    </section>
+
+    <section class="section" id="teoria">
+      <h2>4. Teoria por tras do caso</h2>
+      <h3>4.1 Porque OLTP e OLAP aqui fazem sentido</h3>
+      <p>Mesmo num estudo local, vale a pena separar OLTP e OLAP. A camada SQLite guarda granularidade operacional. A camada DuckDB já pensa em performance para análise e agregação. Isto reflete um padrão real de engenharia de dados.</p>
+
+      <h3>4.2 Porque GBFS e trip history são diferentes</h3>
+      <p><strong>Trip history</strong> mostra viagens concluídas. <strong>GBFS</strong> mostra estado do sistema num instante. A combinação dos dois é importante: um diz-te o que aconteceu, o outro diz-te como o sistema estava.</p>
+
+      <h3>4.3 O que o ML consegue e o que não consegue aqui</h3>
+      <p>O projeto consegue prever propensão de uso de e-bike e agrupar viagens com comportamentos semelhantes. Mas há uma limitação importante: sem identificador estável de utilizador, estás a modelar <strong>perfis de viagem</strong>, não perfis pessoais persistentes.</p>
+    </section>
+
+    <section class="section" id="outputs">
+      <h2>5. Como interpretar os outputs</h2>
+      <h3>5.1 Bases de dados</h3>
+      <ul>
+        <li><code>data/processed/citibike_oltp.db</code>: staging operacional.</li>
+        <li><code>data/processed/citibike_analytics.duckdb</code>: camada analítica.</li>
+      </ul>
+
+      <h3>5.2 Outputs de ML</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Ficheiro</th>
+            <th>O que significa</th>
+            <th>Como usar</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>citibike_ml_metrics.json</code></td>
+            <td>Métricas principais da classificação e número de clusters.</td>
+            <td>Serve para comparar iterações e saber se novas features melhoram o modelo.</td>
+          </tr>
+          <tr>
+            <td><code>ebike_feature_importance.csv</code></td>
+            <td>Importância das variáveis para o uso de e-bike.</td>
+            <td>Ajuda-te a perceber que sinais são mais influentes no problema.</td>
+          </tr>
+          <tr>
+            <td><code>trip_profile_clusters.csv</code></td>
+            <td>Resumo dos grupos encontrados.</td>
+            <td>Podes usar isso para descrever perfis de viagem e construir narrativa analítica.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="callout">
+        Uma accuracy de cerca de <code>0.72</code> no uso de e-bike é um sinal interessante, mas o valor real está em perceber <strong>porque</strong> o modelo decide assim: hora, estação, tipo de utilizador, duração e contexto operacional.
+      </div>
+    </section>
+
+    <section class="section" id="analises">
+      <h2>6. O que mais podes analisar a seguir</h2>
+      <div class="grid">
+        <div class="card"><strong>Procura temporal</strong>Horas de pico, dias úteis vs fim de semana, sazonalidade mensal.</div>
+        <div class="card"><strong>Performance de estações</strong>Estações com maior pressão, maior uso e maior risco de saturação.</div>
+        <div class="card"><strong>E-bike adoption</strong>Onde o uso de e-bike cresce mais e em que contexto.</div>
+        <div class="card"><strong>Rebalancing</strong>Que estações parecem precisar de reposicionamento mais frequente.</div>
+        <div class="card"><strong>Geografia</strong>Mapa de estações, clusters por zona e padrões urbanos.</div>
+        <div class="card"><strong>ML avançado</strong>Forecasting por hora, modelos por estação e explicabilidade mais forte.</div>
+      </div>
+
+      <h3>6.1 Perguntas analíticas fortes</h3>
+      <ul>
+        <li>Que estações combinam alta procura com baixa disponibilidade recorrente?</li>
+        <li>O uso de e-bike cresce mais em trajetos curtos ou longos?</li>
+        <li>Que horas do dia distinguem melhor membros e utilizadores casuais?</li>
+        <li>Que clusters parecem commuters e quais parecem lazer?</li>
+      </ul>
+    </section>
+
+    <section class="section">
+      <h2>7. Como estudar este caso sem te perderes</h2>
+      <ol>
+        <li>Corre o modo sample e confirma que a pipeline fecha.</li>
+        <li>Abre o SQLite para ver as tabelas de staging.</li>
+        <li>Abre o DuckDB para ver as fact tables.</li>
+        <li>Lê os modelos dbt para perceber a camada governada.</li>
+        <li>Corre o ML e abre os outputs gerados.</li>
+        <li>Abre o Streamlit e tenta explicar cada gráfico com base nas tabelas.</li>
+      </ol>
+      <div class="callout ok">
+        Quando conseguires contar a história inteira — origem, staging, modelo, dashboard e interpretação — já não estás só a correr scripts. Já estás a dominar o caso.
+      </div>
+    </section>
+  </div>
+</body>
+</html>

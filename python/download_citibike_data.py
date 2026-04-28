@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import argparse
+import csv
+import io
 import json
 import re
 import ssl
@@ -101,7 +103,17 @@ def download_trip_archives(keys: list[str]) -> list[Path]:
     return downloaded
 
 
-def extract_trip_archives(archives: list[Path]) -> list[Path]:
+def download_extract_trip_archives(keys: list[str], sample_rows_per_file: int | None = None) -> list[Path]:
+    extracted: list[Path] = []
+    for key in keys:
+        archive = download_trip_archives([key])[0]
+        extracted.extend(extract_trip_archives([archive], sample_rows_per_file=sample_rows_per_file))
+        if sample_rows_per_file is not None:
+            archive.unlink(missing_ok=True)
+    return extracted
+
+
+def extract_trip_archives(archives: list[Path], sample_rows_per_file: int | None = None) -> list[Path]:
     TRIP_CSV_DIR.mkdir(parents=True, exist_ok=True)
     extracted: list[Path] = []
     for archive in archives:
@@ -109,8 +121,20 @@ def extract_trip_archives(archives: list[Path]) -> list[Path]:
             for name in zip_file.namelist():
                 if name.endswith(".csv"):
                     output_path = TRIP_CSV_DIR / Path(name).name
-                    with zip_file.open(name) as src, open(output_path, "wb") as dst:
-                        shutil.copyfileobj(src, dst)
+                    if sample_rows_per_file is None:
+                        with zip_file.open(name) as src, open(output_path, "wb") as dst:
+                            shutil.copyfileobj(src, dst)
+                    else:
+                        with zip_file.open(name) as src, output_path.open("w", encoding="utf-8", newline="") as dst:
+                            reader = csv.reader(io.TextIOWrapper(src, encoding="utf-8", errors="replace"))
+                            writer = csv.writer(dst)
+                            header = next(reader, None)
+                            if header is not None:
+                                writer.writerow(header)
+                                for index, row in enumerate(reader):
+                                    if index >= sample_rows_per_file:
+                                        break
+                                    writer.writerow(row)
                     extracted.append(output_path)
     return extracted
 
@@ -135,18 +159,38 @@ def download_gbfs_snapshot() -> list[Path]:
 def main() -> None:
     parser = argparse.ArgumentParser(description="Download real Citi Bike data.")
     parser.add_argument("--months", type=int, default=3, help="How many latest months to download.")
+    parser.add_argument("--years", type=int, default=None, help="How many latest years to download. Example: --years 2.")
+    parser.add_argument(
+        "--sample-rows-per-file",
+        type=int,
+        default=None,
+        help="Extract only the first N rows from each trip CSV inside the official archives.",
+    )
     args = parser.parse_args()
 
-    keys = select_latest_archives(args.months)
+    months = args.years * 12 if args.years is not None else args.months
+    keys = select_latest_archives(months)
     if not keys:
         raise RuntimeError("No Citi Bike trip archives were found in the official tripdata bucket.")
 
-    archives = download_trip_archives(keys)
-    extracted = extract_trip_archives(archives)
+    if args.sample_rows_per_file is None:
+        archives = download_trip_archives(keys)
+        extracted = extract_trip_archives(archives)
+        archive_count = len(archives)
+    else:
+        extracted = download_extract_trip_archives(keys, sample_rows_per_file=args.sample_rows_per_file)
+        archive_count = 0
     gbfs_files = download_gbfs_snapshot()
 
-    print(f"Downloaded {len(archives)} Citi Bike trip archives.")
-    print(f"Extracted {len(extracted)} CSV files.")
+    print(f"Selected latest {months} month(s).")
+    if args.sample_rows_per_file is None:
+        print(f"Downloaded {archive_count} Citi Bike trip archives.")
+    else:
+        print("Downloaded archives one at a time and removed them after sampled extraction.")
+    if args.sample_rows_per_file is None:
+        print(f"Extracted {len(extracted)} CSV files.")
+    else:
+        print(f"Extracted {len(extracted)} sampled CSV files ({args.sample_rows_per_file} rows per file).")
     print(f"Saved {len(gbfs_files)} GBFS snapshot files.")
 
 

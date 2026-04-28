@@ -15,6 +15,10 @@ GitHub repository:
 
 - Project hub: [index.html](index.html)
 - Handbook: [docs/citibike_handbook.html](docs/citibike_handbook.html)
+- Usage and theory tutorial: [docs/tutorial_utilizacao_teoria_citibike.html](docs/tutorial_utilizacao_teoria_citibike.html)
+- Theory, code, and outputs: [docs/explicacao_teorica_codigo_outputs.html](docs/explicacao_teorica_codigo_outputs.html)
+- ML experiments, comparison, visualizations, and 2-year data: [docs/ml_experimentos_visualizacoes_2anos.html](docs/ml_experimentos_visualizacoes_2anos.html)
+- Code and documentation uniformization: [docs/uniformizacao_codigo_documentacao.html](docs/uniformizacao_codigo_documentacao.html)
 
 ## Fontes oficiais
 

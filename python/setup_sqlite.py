@@ -210,8 +210,62 @@ def insert_trips(connection: sqlite3.Connection, sample_rows_per_file: int | Non
     return inserted_rows
 
 
-def load_station_information() -> pd.DataFrame:
-    payload = json.loads(latest_gbfs_file("station_information").read_text(encoding="utf-8"))
+def derive_station_information_from_trips(sample_rows_per_file: int | None = None) -> pd.DataFrame:
+    station_rows: dict[str, dict] = {}
+    csv_files = sorted(
+        path for path in (RAW_DIR / "tripdata_csv").glob("*.csv") if not path.name.startswith("._")
+    )
+    for csv_file in csv_files:
+        for chunk in trip_csv_chunks(csv_file, sample_rows=sample_rows_per_file):
+            start_records = chunk[
+                ["start_station_id", "start_station_name", "start_lat", "start_lng"]
+            ].rename(
+                columns={
+                    "start_station_id": "station_id",
+                    "start_station_name": "name",
+                    "start_lat": "lat",
+                    "start_lng": "lon",
+                }
+            )
+            end_records = chunk[
+                ["end_station_id", "end_station_name", "end_lat", "end_lng"]
+            ].rename(
+                columns={
+                    "end_station_id": "station_id",
+                    "end_station_name": "name",
+                    "end_lat": "lat",
+                    "end_lng": "lon",
+                }
+            )
+            for record in pd.concat([start_records, end_records], ignore_index=True).dropna(
+                subset=["station_id", "name", "lat", "lon"]
+            ).itertuples(index=False):
+                station_id = str(record.station_id)
+                if station_id and station_id.lower() != "nan":
+                    station_rows.setdefault(
+                        station_id,
+                        {
+                            "station_id": station_id,
+                            "name": str(record.name),
+                            "short_name": None,
+                            "lat": float(record.lat),
+                            "lon": float(record.lon),
+                            "capacity": None,
+                            "region_id": None,
+                            "electric_bike_surcharge_waiver": None,
+                        },
+                    )
+    if not station_rows:
+        raise FileNotFoundError("Could not derive station information from trip CSV files.")
+    return pd.DataFrame(station_rows.values())
+
+
+def load_station_information(sample_rows_per_file: int | None = None) -> pd.DataFrame:
+    try:
+        payload = json.loads(latest_gbfs_file("station_information").read_text(encoding="utf-8"))
+    except FileNotFoundError:
+        print("GBFS station_information missing; deriving stations from trip CSV files.")
+        return derive_station_information_from_trips(sample_rows_per_file=sample_rows_per_file)
     df = pd.DataFrame(payload["data"]["stations"])
     if "electric_bike_surcharge_waiver" not in df.columns:
         df["electric_bike_surcharge_waiver"] = None
@@ -230,7 +284,23 @@ def load_station_information() -> pd.DataFrame:
 
 
 def load_station_status() -> pd.DataFrame:
-    gbfs_file = latest_gbfs_file("station_status")
+    try:
+        gbfs_file = latest_gbfs_file("station_status")
+    except FileNotFoundError:
+        print("GBFS station_status missing; creating empty station status snapshot table.")
+        return pd.DataFrame(
+            columns=[
+                "snapshot_ts",
+                "station_id",
+                "num_bikes_available",
+                "num_ebikes_available",
+                "num_docks_available",
+                "is_installed",
+                "is_renting",
+                "is_returning",
+                "last_reported",
+            ]
+        )
     snapshot_ts = gbfs_file.name.split("_station_status.json")[0]
     payload = json.loads(gbfs_file.read_text(encoding="utf-8"))
     df = pd.DataFrame(payload["data"]["stations"])
@@ -253,7 +323,11 @@ def load_station_status() -> pd.DataFrame:
 
 
 def load_vehicle_types() -> pd.DataFrame:
-    payload = json.loads(latest_gbfs_file("vehicle_types").read_text(encoding="utf-8"))
+    try:
+        payload = json.loads(latest_gbfs_file("vehicle_types").read_text(encoding="utf-8"))
+    except FileNotFoundError:
+        print("GBFS vehicle_types missing; creating empty vehicle_types table.")
+        return pd.DataFrame(columns=["vehicle_type_id", "form_factor", "propulsion_type", "max_range_meters"])
     df = pd.DataFrame(payload["data"]["vehicle_types"])
     if "max_range_meters" not in df.columns:
         df["max_range_meters"] = None
@@ -261,7 +335,21 @@ def load_vehicle_types() -> pd.DataFrame:
 
 
 def load_system_information() -> pd.DataFrame:
-    payload = json.loads(latest_gbfs_file("system_information").read_text(encoding="utf-8"))
+    try:
+        payload = json.loads(latest_gbfs_file("system_information").read_text(encoding="utf-8"))
+    except FileNotFoundError:
+        print("GBFS system_information missing; creating default system_information row.")
+        return pd.DataFrame(
+            [
+                {
+                    "system_id": "citi_bike",
+                    "language": "en",
+                    "name": "Citi Bike",
+                    "operator": "Lyft/Bike Share",
+                    "timezone": "America/New_York",
+                }
+            ]
+        )
     data = payload["data"]
     return pd.DataFrame(
         [
@@ -289,7 +377,7 @@ def main() -> None:
     PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
     schema_sql = (SQL_DIR / "01_create_tables.sql").read_text(encoding="utf-8")
 
-    stations = load_station_information()
+    stations = load_station_information(sample_rows_per_file=args.sample_rows_per_file)
     station_status = load_station_status()
     vehicle_types = load_vehicle_types()
     system_information = load_system_information()

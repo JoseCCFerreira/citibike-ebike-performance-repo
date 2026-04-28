@@ -86,6 +86,7 @@
       <div class="hero-actions">
         <a class="primary" href="../index.html">Abrir Hub do Projeto</a>
         <a href="../README.md">Abrir README</a>
+        <a href="ml_experimentos_visualizacoes_2anos.html">ML + Comparação</a>
         <a href="https://github.com/JoseCCFerreira/citibike-ebike-performance-repo">Ver GitHub</a>
       </div>
     </div>
@@ -315,8 +316,25 @@ dbt test</code></pre>
         <li>duração média;</li>
         <li>percentagem de e-bike;</li>
         <li>e-bike share por hora;</li>
-        <li>top start stations.</li>
+        <li>top start stations;</li>
+        <li>risco de utilização/saturação nas estações;</li>
+        <li>comparação de modelos para prever uso de e-bike;</li>
+        <li>importância das variáveis e perfis médios de clusters.</li>
       </ul>
+
+      <h3>Como analisar no dashboard</h3>
+      <table>
+        <thead>
+          <tr><th>Bloco</th><th>O que observar</th><th>Decisão analítica</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>E-bike por hora</td><td>Horas com maior adoção de e-bike.</td><td>Perceber quando a procura elétrica ganha peso.</td></tr>
+          <tr><td>Top estações</td><td>Concentração de partidas e duração média.</td><td>Identificar pontos de maior procura operacional.</td></tr>
+          <tr><td>Risco de estações</td><td>Utilização e disponibilidade no snapshot GBFS.</td><td>Priorizar análise de rebalancing.</td></tr>
+          <tr><td>Comparação de modelos</td><td>F1, Accuracy, Precision, Recall e ROC AUC.</td><td>Escolher modelo de e-bike sem olhar apenas para accuracy.</td></tr>
+          <tr><td>Clusters</td><td>Duração, hora, membro/casual e proporção de e-bike por grupo.</td><td>Traduzir perfis de viagem em narrativa operacional.</td></tr>
+        </tbody>
+      </table>
 
       <h3>Comando</h3>
       <pre><code>streamlit run streamlit/app.py</code></pre>
@@ -343,7 +361,53 @@ dbt test</code></pre>
         <li><strong>Classificação</strong>: prever classe alvo, aqui e-bike vs não e-bike.</li>
         <li><strong>Clustering</strong>: agrupar viagens semelhantes sem rótulo.</li>
         <li><strong>Accuracy</strong>: % de acertos na classificação.</li>
+        <li><strong>Precision</strong>: quando o modelo prevê e-bike, quantas vezes acerta.</li>
+        <li><strong>Recall</strong>: de todas as viagens e-bike reais, quantas o modelo consegue apanhar.</li>
+        <li><strong>F1</strong>: equilíbrio entre precision e recall.</li>
+        <li><strong>ROC AUC</strong>: capacidade de separar e-bike de não e-bike ao longo de vários thresholds.</li>
       </ul>
+
+      <h3>Entender, aplicar e analisar</h3>
+      <table>
+        <thead>
+          <tr><th>Etapa</th><th>O que fazer</th><th>Como interpretar</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Entender</td>
+            <td>Separar problema de negócio: adoção de e-bike, procura por estação, duração e perfis de viagem.</td>
+            <td>O modelo deve responder a uma pergunta operacional, não só produzir uma métrica.</td>
+          </tr>
+          <tr>
+            <td>Aplicar</td>
+            <td>Correr <code>python python/ml_citibike.py</code> e abrir <code>streamlit run streamlit/app.py</code>.</td>
+            <td>O dashboard compara Logistic Regression, Random Forest e Gradient Boosting para prever e-bike.</td>
+          </tr>
+          <tr>
+            <td>Analisar</td>
+            <td>Comparar F1/Accuracy/ROC AUC, depois ler feature importance e clusters.</td>
+            <td>Se uma métrica sobe mas a interpretação operacional piora, o modelo ainda precisa de revisão.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Experiências adicionais recomendadas</h3>
+      <ul>
+        <li>prever duração da viagem com regressão;</li>
+        <li>classificar <code>member_casual</code> para estudar padrões de utilizador;</li>
+        <li>fazer forecast de procura por hora ou por dia;</li>
+        <li>detetar estações anómalas com regras simples ou Isolation Forest;</li>
+        <li>validar modelos temporalmente, treinando em meses antigos e testando em meses recentes.</li>
+      </ul>
+
+      <h3>Dados dos últimos dois anos</h3>
+      <pre><code>python python/run_pipeline.py --years 2 --sample-rows-per-file 20000
+python python/ml_citibike.py
+streamlit run streamlit/app.py</code></pre>
+
+      <div class="callout info">
+        Para manter o projeto leve, usa <code>--sample-rows-per-file</code> quando trabalhares com dois anos. Nesse modo, o script descarrega cada ZIP oficial, extrai apenas a amostra e apaga o ZIP logo de seguida. A página complementar <a href="ml_experimentos_visualizacoes_2anos.html">ML, comparação, visualizações e dados de 2 anos</a> explica os casos de teste, métricas e comandos para descarregar os últimos 24 meses oficiais.
+      </div>
 
       <div class="callout warning">
         Sem user ID persistente, este caso modela <strong>grupos de viagem</strong>, não grupos pessoais ao longo do tempo.
